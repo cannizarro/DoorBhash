@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "120505765651",
+    "firebase_url": "https://doorbhash-616a3.firebaseio.com",
+    "project_id": "doorbhash-616a3",
+    "storage_bucket": "doorbhash-616a3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:120505765651:android:84f0b2532c48b722ca54e6",
+        "android_client_info": {
+          "package_name": "com.cannizarro.doorbhash"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "120505765651-cc6dpbv9rgpd44q60h3qf9annlacciq6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cannizarro.doorbhash",
+            "certificate_hash": "d02e31274f0782c0f9cd5f1470ff28cb29855ace"
+          }
+        },
+        {
+          "client_id": "120505765651-dafu6cabj0dicf71d17298jotqhl9fl2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDjlcfdygt1gqjlWf_gxlsGqoscJMF8FE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "120505765651-dafu6cabj0dicf71d17298jotqhl9fl2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
