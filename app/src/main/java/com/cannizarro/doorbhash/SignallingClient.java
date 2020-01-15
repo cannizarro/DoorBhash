@@ -174,9 +174,8 @@ class SignallingClient {
     public void emitMessage(SessionDescription message) {
         try {
             Log.d("SignallingClient", "emitMessage() called with: message = [" + message + "]");
-            JSONObject obj = new JSONObject();
-            obj.put("type", message.type.canonicalForm());
-            obj.put("sdp", message.description);
+            SDP obj = new SDP(message);
+
             Log.d("emitMessage", obj.toString());
             socket.emit("message", obj);
             Log.d("vivek1794", obj.toString());
@@ -188,11 +187,8 @@ class SignallingClient {
 
     public void emitIceCandidate(IceCandidate iceCandidate) {
         try {
-            JSONObject object = new JSONObject();
-            object.put("type", "candidate");
-            object.put("label", iceCandidate.sdpMLineIndex);
-            object.put("id", iceCandidate.sdpMid);
-            object.put("candidate", iceCandidate.sdp);
+            SDP object = new SDP(iceCandidate);
+
             socket.emit("message", object);
         } catch (Exception e) {
             e.printStackTrace();

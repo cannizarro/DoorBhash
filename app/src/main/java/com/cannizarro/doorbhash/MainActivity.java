@@ -2,6 +2,7 @@ package com.cannizarro.doorbhash;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,10 +24,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void createRoom(){
+        Intent intent = new Intent(getApplicationContext(), DialerScreen.class)
+                .putExtra("initiator", true);
+        startActivity(intent);
 
     }
 
     public void joinRoom(){
+        Intent intent = new Intent(getApplicationContext(), RoomList.class)
+                .putExtra("initiator", false);
+        startActivity(intent);
 
     }
 }

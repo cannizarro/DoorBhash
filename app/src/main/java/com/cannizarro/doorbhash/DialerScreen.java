@@ -1,6 +1,7 @@
 package com.cannizarro.doorbhash;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 /*import android.support.annotation.NonNull;
@@ -71,16 +72,21 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
     EglBase rootEglBase;
 
     boolean gotUserMedia;
+    boolean isinitiator = false;
     List<PeerConnection.IceServer> peerIceServers = new ArrayList<>();
 
     final int ALL_PERMISSIONS_CODE = 1;
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "DialerScreen";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Intent intent = getIntent();
+
+        isinitiator = intent.getBooleanExtra("initiator", false);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
                 || ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -481,7 +487,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
     }
 
     public void showToast(final String msg) {
-        runOnUiThread(() -> Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show());
+        runOnUiThread(() -> Toast.makeText(DialerScreen.this, msg, Toast.LENGTH_SHORT).show());
     }
 
     private VideoCapturer createCameraCapturer(CameraEnumerator enumerator) {
