@@ -96,11 +96,11 @@ class SignallingClient {
             attachTransferReadListener();
 
             //room created event.
-            socket.on("created", args -> {
+            /*socket.on("created", args -> {
                 Log.d("SignallingClient", "created call() called with: args = [" + Arrays.toString(args) + "]");
                 isInitiator = true;
                 callback.onCreatedRoom();
-            });
+            });*/
 
             //room is full event
             socket.on("full", args -> Log.d("SignallingClient", "full call() called with: args = [" + Arrays.toString(args) + "]"));
@@ -117,7 +117,7 @@ class SignallingClient {
                 Log.d("SignallingClient", "joined call() called with: args = [" + Arrays.toString(args) + "]");
                 isChannelReady = true;
                 callback.onJoinedRoom();
-            });
+            });*/
 
             //log event
             socket.on("log", args -> Log.d("SignallingClient", "log call() called with: args = [" + Arrays.toString(args) + "]"));
@@ -247,16 +247,16 @@ class SignallingClient {
 
         void onOfferReceived(JSONObject data);
 
-        void onAnswerReceived(JSONObject data);
+        void onAnswerReceived(SDP data);
 
-        void onIceCandidateReceived(JSONObject data);
+        void onIceCandidateReceived(SDP data);
 
         void onTryToStart();
 
-        void onCreatedRoom();
+        //void onCreatedRoom();
 
-        void onJoinedRoom();
+        //void onJoinedRoom();
 
-        void onNewPeerJoined();
+        //void onNewPeerJoined();
     }
 }

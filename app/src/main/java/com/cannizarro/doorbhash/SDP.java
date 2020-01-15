@@ -7,13 +7,13 @@ import org.webrtc.SessionDescription;
 
 public class SDP {
 
-    private String username;
-    private String type;
-    private String sdp;
+    public String username;
+    public String type;
+    public String sdp;
 
-    private int label;
-    private String id;
-    private String candidate;
+    public int label;
+    public String id;
+    public String candidate;
 
     public SDP(IceCandidate iceCandidate){
 
