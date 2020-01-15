@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">DoorBhash</string>
+
+    <string-array name="array_technology">
+        <item>Room1</item>
+        <item>Room2</item>
+        <item>Room3</item>
+        <item>Room4</item>
+        <item>Room5</item>
+    </string-array>
 </resources>
