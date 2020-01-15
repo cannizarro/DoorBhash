@@ -55,23 +55,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void createRoom(){
+    public void createRoom() {
         Intent intent = new Intent(getApplicationContext(), DialerScreen.class)
                 .putExtra("initiator", true);
         startActivity(intent);
-      
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
 
-
-        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
-            // The Task returned from this call is always completed, no need to attach
-            // a listener.
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            handleSignInResult(task);
-        }
     }
 
 
@@ -79,6 +67,8 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), RoomList.class)
                 .putExtra("initiator", false);
         startActivity(intent);
+
+    }
 
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
@@ -92,6 +82,20 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, "Failed", Toast.LENGTH_LONG).show();
         }
     }
+
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            super.onActivityResult(requestCode, resultCode, data);
+
+
+            // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
+            if (requestCode == RC_SIGN_IN) {
+                // The Task returned from this call is always completed, no need to attach
+                // a listener.
+                Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+                handleSignInResult(task);
+            }
+        }
 
     @Override
     protected void onStart() {
