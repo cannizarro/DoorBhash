@@ -54,9 +54,16 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
+
+    public void createRoom(){
+        Intent intent = new Intent(getApplicationContext(), DialerScreen.class)
+                .putExtra("initiator", true);
+        startActivity(intent);
+      
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
 
         // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
@@ -66,6 +73,12 @@ public class MainActivity extends AppCompatActivity {
             handleSignInResult(task);
         }
     }
+
+
+    public void joinRoom(){
+        Intent intent = new Intent(getApplicationContext(), RoomList.class)
+                .putExtra("initiator", false);
+        startActivity(intent);
 
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
