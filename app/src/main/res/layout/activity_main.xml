@@ -1,36 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:background="@color/colorPrimary">
 
-    <EditText
-        android:id="@+id/roomName"
+    <com.google.android.gms.common.SignInButton
+        android:id="@+id/sign_in_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="Enter room name"
-        android:inputType="textPersonName"
-        tools:layout_editor_absoluteX="99dp"
-        tools:layout_editor_absoluteY="147dp" />
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"/>
 
-    <Button
-        android:id="@+id/create"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="createRoom"
-        android:text="Create Room"
-        tools:layout_editor_absoluteX="145dp"
-        tools:layout_editor_absoluteY="266dp" />
-
-    <Button
-        android:id="@+id/join"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="joinRoom"
-        android:text="Join Room"
-        tools:layout_editor_absoluteX="145dp"
-        tools:layout_editor_absoluteY="396dp" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>
