@@ -171,10 +171,10 @@ class SignallingClient {
         socket.emit("message", message);
     }
 
-    public void emitMessage(SessionDescription message) {
+    public void emitMessage(SessionDescription message, String username) {
         try {
             Log.d("SignallingClient", "emitMessage() called with: message = [" + message + "]");
-            SDP obj = new SDP(message);
+            SDP obj = new SDP(message, username);
 
             Log.d("emitMessage", obj.toString());
             socket.emit("message", obj);
@@ -185,9 +185,9 @@ class SignallingClient {
     }
 
 
-    public void emitIceCandidate(IceCandidate iceCandidate) {
+    public void emitIceCandidate(IceCandidate iceCandidate, String username) {
         try {
-            SDP object = new SDP(iceCandidate);
+            SDP object = new SDP(iceCandidate, username);
 
             socket.emit("message", object);
         } catch (Exception e) {

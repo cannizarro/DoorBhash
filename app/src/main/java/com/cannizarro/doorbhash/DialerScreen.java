@@ -54,6 +54,8 @@ import retrofit2.Response;
 
 
 public class DialerScreen extends AppCompatActivity implements View.OnClickListener, SignallingClient.SignalingInterface {
+
+    String ANONYMOUS = "anonymous";
     PeerConnectionFactory peerConnectionFactory;
     MediaConstraints audioConstraints;
     MediaConstraints videoConstraints;
@@ -74,6 +76,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
     boolean gotUserMedia;
     boolean isinitiator = false;
     boolean isChannelReady;
+    String username;
     List<PeerConnection.IceServer> peerIceServers = new ArrayList<>();
 
     final int ALL_PERMISSIONS_CODE = 1;
@@ -88,6 +91,8 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         Intent intent = getIntent();
 
         isinitiator = intent.getBooleanExtra("initiator", false);
+        username =intent.getStringExtra("username");
+
 
         isChannelReady = true;
 
@@ -319,7 +324,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
                 super.onCreateSuccess(sessionDescription);
                 localPeer.setLocalDescription(new CustomSdpObserver("localSetLocalDesc"), sessionDescription);
                 Log.d("onCreateSuccess", "SignallingClient emit ");
-                SignallingClient.getInstance().emitMessage(sessionDescription);
+                SignallingClient.getInstance().emitMessage(sessionDescription, username);
             }
         }, sdpConstraints);
     }
@@ -347,7 +352,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
      */
     public void onIceCandidateReceived(IceCandidate iceCandidate) {
         //we have received ice candidate. We can set it to the other peer.
-        SignallingClient.getInstance().emitIceCandidate(iceCandidate);
+        SignallingClient.getInstance().emitIceCandidate(iceCandidate, username);
     }
 
     /**
@@ -410,7 +415,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
             public void onCreateSuccess(SessionDescription sessionDescription) {
                 super.onCreateSuccess(sessionDescription);
                 localPeer.setLocalDescription(new CustomSdpObserver("localSetLocal"), sessionDescription);
-                SignallingClient.getInstance().emitMessage(sessionDescription);
+                SignallingClient.getInstance().emitMessage(sessionDescription, username);
             }
         }, new MediaConstraints());
     }
