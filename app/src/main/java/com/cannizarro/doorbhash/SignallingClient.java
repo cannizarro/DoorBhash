@@ -21,7 +21,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-import io.socket.client.Socket;
+//import io.socket.client.Socket;
 
 /**
  * Webrtc_Step3
@@ -31,15 +31,15 @@ import io.socket.client.Socket;
 class SignallingClient {
     private static SignallingClient instance;
     private String roomName = null;
-    private Socket socket;
+    //private Socket socket;
     boolean isChannelReady = false;
     boolean isInitiator = false;
     boolean isStarted = false;
     private SignalingInterface callback;
     private FirebaseDatabase firebaseDatabase;
-    private DatabaseReference room;
+    private DatabaseReference room;/*
     private ChildEventListener initiatorListener;
-    private ChildEventListener roomListener;
+    private ChildEventListener roomListener;*/
 
     //This piece of code should not go into production!!
     //This will help in cases where the node server is running in non-https server and you want to ignore the warnings
@@ -65,7 +65,7 @@ class SignallingClient {
         }
         if (instance.roomName == null) {
             //set the room name here
-            instance.roomName = "vivek17";
+            instance.roomName = "default";
         }
         return instance;
     }
@@ -73,6 +73,7 @@ class SignallingClient {
     public void init(SignalingInterface signalingInterface) {
         this.callback = signalingInterface;
         try {
+
             /*
             SSLContext sslcontext = SSLContext.getInstance("TLS");
             sslcontext.init(null, trustAllCerts, null);
@@ -84,23 +85,21 @@ class SignallingClient {
             */
             Log.d("SignallingClient", "init() called");
 
-            firebaseDatabase = FirebaseDatabase.getInstance();
+            firebaseDatabase = MainActivity.firebaseDatabase;
 
             if (!roomName.isEmpty()) {
                 emitInitStatement(roomName);
             }
 
-            room = firebaseDatabase.getReference("/video/" + roomName + "/");
+            room = firebaseDatabase.getReference("/rooms/" + roomName + "/");
 
-            attachInitiatorReadListener();
-            attachTransferReadListener();
 
             //room created event.
-            socket.on("created", args -> {
+            /*socket.on("created", args -> {
                 Log.d("SignallingClient", "created call() called with: args = [" + Arrays.toString(args) + "]");
                 isInitiator = true;
                 callback.onCreatedRoom();
-            });
+            });*/
 
             //room is full event
             socket.on("full", args -> Log.d("SignallingClient", "full call() called with: args = [" + Arrays.toString(args) + "]"));
@@ -171,12 +170,11 @@ class SignallingClient {
         socket.emit("message", message);
     }
 
-    public void emitMessage(SessionDescription message) {
+    public void emitMessage(SessionDescription message, String username) {
         try {
             Log.d("SignallingClient", "emitMessage() called with: message = [" + message + "]");
-            JSONObject obj = new JSONObject();
-            obj.put("type", message.type.canonicalForm());
-            obj.put("sdp", message.description);
+            SDP obj = new SDP(message, username);
+
             Log.d("emitMessage", obj.toString());
             socket.emit("message", obj);
             Log.d("vivek1794", obj.toString());
@@ -186,13 +184,10 @@ class SignallingClient {
     }
 
 
-    public void emitIceCandidate(IceCandidate iceCandidate) {
+    public void emitIceCandidate(IceCandidate iceCandidate, String username) {
         try {
-            JSONObject object = new JSONObject();
-            object.put("type", "candidate");
-            object.put("label", iceCandidate.sdpMLineIndex);
-            object.put("id", iceCandidate.sdpMid);
-            object.put("candidate", iceCandidate.sdp);
+            SDP object = new SDP(iceCandidate, username);
+
             socket.emit("message", object);
         } catch (Exception e) {
             e.printStackTrace();
@@ -251,16 +246,16 @@ class SignallingClient {
 
         void onOfferReceived(JSONObject data);
 
-        void onAnswerReceived(JSONObject data);
+        void onAnswerReceived(SDP data);
 
-        void onIceCandidateReceived(JSONObject data);
+        void onIceCandidateReceived(SDP data);
 
         void onTryToStart();
 
-        void onCreatedRoom();
+        //void onCreatedRoom();
 
-        void onJoinedRoom();
+        //void onJoinedRoom();
 
-        void onNewPeerJoined();
+        //void onNewPeerJoined();
     }
 }
