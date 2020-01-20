@@ -21,7 +21,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-import io.socket.client.Socket;
+//import io.socket.client.Socket;
 
 /**
  * Webrtc_Step3
@@ -31,15 +31,15 @@ import io.socket.client.Socket;
 class SignallingClient {
     private static SignallingClient instance;
     private String roomName = null;
-    private Socket socket;
+    //private Socket socket;
     boolean isChannelReady = false;
     boolean isInitiator = false;
     boolean isStarted = false;
     private SignalingInterface callback;
     private FirebaseDatabase firebaseDatabase;
-    private DatabaseReference room;
+    private DatabaseReference room;/*
     private ChildEventListener initiatorListener;
-    private ChildEventListener roomListener;
+    private ChildEventListener roomListener;*/
 
     //This piece of code should not go into production!!
     //This will help in cases where the node server is running in non-https server and you want to ignore the warnings
@@ -65,7 +65,7 @@ class SignallingClient {
         }
         if (instance.roomName == null) {
             //set the room name here
-            instance.roomName = "vivek17";
+            instance.roomName = "default";
         }
         return instance;
     }
@@ -73,6 +73,7 @@ class SignallingClient {
     public void init(SignalingInterface signalingInterface) {
         this.callback = signalingInterface;
         try {
+
             /*
             SSLContext sslcontext = SSLContext.getInstance("TLS");
             sslcontext.init(null, trustAllCerts, null);
@@ -84,16 +85,14 @@ class SignallingClient {
             */
             Log.d("SignallingClient", "init() called");
 
-            firebaseDatabase = FirebaseDatabase.getInstance();
+            firebaseDatabase = MainActivity.firebaseDatabase;
 
             if (!roomName.isEmpty()) {
                 emitInitStatement(roomName);
             }
 
-            room = firebaseDatabase.getReference("/video/" + roomName + "/");
+            room = firebaseDatabase.getReference("/rooms/" + roomName + "/");
 
-            attachInitiatorReadListener();
-            attachTransferReadListener();
 
             //room created event.
             /*socket.on("created", args -> {
@@ -117,7 +116,7 @@ class SignallingClient {
                 Log.d("SignallingClient", "joined call() called with: args = [" + Arrays.toString(args) + "]");
                 isChannelReady = true;
                 callback.onJoinedRoom();
-            });*/
+            });
 
             //log event
             socket.on("log", args -> Log.d("SignallingClient", "log call() called with: args = [" + Arrays.toString(args) + "]"));

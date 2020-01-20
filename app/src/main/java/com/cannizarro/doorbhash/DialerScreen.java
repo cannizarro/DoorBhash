@@ -184,7 +184,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         initVideos();
         getIceServers();
 
-        SignallingClient.getInstance().init(this);
+        //SignallingClient.getInstance().init(this);
 
         //Initialize PeerConnectionFactory globals.
         PeerConnectionFactory.InitializationOptions initializationOptions =
@@ -324,7 +324,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
                 super.onCreateSuccess(sessionDescription);
                 localPeer.setLocalDescription(new CustomSdpObserver("localSetLocalDesc"), sessionDescription);
                 Log.d("onCreateSuccess", "SignallingClient emit ");
-                SignallingClient.getInstance().emitMessage(sessionDescription, username);
+                //SignallingClient.getInstance().emitMessage(sessionDescription, username);
             }
         }, sdpConstraints);
     }
@@ -352,7 +352,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
      */
     public void onIceCandidateReceived(IceCandidate iceCandidate) {
         //we have received ice candidate. We can set it to the other peer.
-        SignallingClient.getInstance().emitIceCandidate(iceCandidate, username);
+        //SignallingClient.getInstance().emitIceCandidate(iceCandidate, username);
     }
 
     /**
@@ -415,7 +415,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
             public void onCreateSuccess(SessionDescription sessionDescription) {
                 super.onCreateSuccess(sessionDescription);
                 localPeer.setLocalDescription(new CustomSdpObserver("localSetLocal"), sessionDescription);
-                SignallingClient.getInstance().emitMessage(sessionDescription, username);
+                //SignallingClient.getInstance().emitMessage(sessionDescription, username);
             }
         }, new MediaConstraints());
     }
@@ -476,7 +476,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         try {
             localPeer.close();
             localPeer = null;
-            SignallingClient.getInstance().close();
+            //SignallingClient.getInstance().close();
             updateVideoViews(false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -486,7 +486,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onDestroy() {
-        SignallingClient.getInstance().close();
+        //SignallingClient.getInstance().close();
         super.onDestroy();
     }
 

@@ -5,12 +5,18 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,35 +29,14 @@ public class MainActivity extends AppCompatActivity {
     public static final int RC_SIGN_IN= 1;
 
     private String username;
+    private String roomName;
     private FirebaseAuth mFirebaseAuth;
-    private FirebaseAuth.AuthStateListener mAuthStateListner = new FirebaseAuth.AuthStateListener() {
-        @Override
-        public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-            FirebaseUser firebaseUser=firebaseAuth.getCurrentUser();
-            if(firebaseUser != null)
-            {
-                //signed in
-                onSignedInInitialize(firebaseUser.getDisplayName());
-            }
-            else
-            {
-                //signed out
-                onSignedOutCleanup();
-                // Choose authentication providers
-                List<AuthUI.IdpConfig> providers = Arrays.asList(
-                        new AuthUI.IdpConfig.EmailBuilder().build(),
-                        new AuthUI.IdpConfig.GoogleBuilder().build());
+    private FirebaseAuth.AuthStateListener mAuthStateListner;
+    static FirebaseDatabase firebaseDatabase;
+    private DatabaseReference databaseReference;
 
-                // Create and launch sign-in intent
-                startActivityForResult(
-                        AuthUI.getInstance()
-                                .createSignInIntentBuilder()
-                                .setAvailableProviders(providers)
-                                .build(),
-                        RC_SIGN_IN);
-            }
-        }
-    };
+    EditText roomText;
+    Button createRoomButton;
 
 
     @Override
@@ -59,7 +44,32 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        firebaseDatabase = FirebaseDatabase.getInstance();
+        databaseReference = firebaseDatabase.getReference("rooms");
+
+        roomText = findViewById(R.id.roomName);
+        createRoomButton = findViewById(R.id.create);
+
         mFirebaseAuth = FirebaseAuth.getInstance();
+
+        roomText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (charSequence.toString().trim().length() > 0) {
+                    createRoomButton.setEnabled(true);
+                } else {
+                    createRoomButton.setEnabled(false);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+            }
+        });
 
         mAuthStateListner = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -78,7 +88,6 @@ public class MainActivity extends AppCompatActivity {
                     onSignedOutCleanup();
                     // Choose authentication providers
                     List<AuthUI.IdpConfig> providers = Arrays.asList(
-                            new AuthUI.IdpConfig.EmailBuilder().build(),
                             new AuthUI.IdpConfig.GoogleBuilder().build());
 
                     // Create and launch sign-in intent
@@ -96,19 +105,27 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    public void createRoom() {
+    public void createRoom(View v) {
+
+        //Creating room. Adding a child named what's in the edit text
+        roomName = roomText.getText().toString();
+        roomText.setText(null);
+
+        databaseReference.push().setValue(roomName);
+        //databaseReference.child("/" + roomName + "/");
+
         Intent intent = new Intent(getApplicationContext(), DialerScreen.class)
                 .putExtra("initiator", true)
-                .putExtra("username", username);
-        startActivity(intent);
+                .putExtra("username", username)
+                .putExtra("roomname", roomName);
+        //startActivity(intent);
 
     }
 
 
-    public void joinRoom(){
+    public void joinRoom(View v){
         Intent intent = new Intent(getApplicationContext(), RoomList.class)
-                .putExtra("initiator", false)
-                .putExtra("username", username);;
+                .putExtra("username", username);
         startActivity(intent);
 
     }
