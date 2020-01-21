@@ -32,8 +32,8 @@ class SignallingClient {
     private static SignallingClient instance;
     private String roomName = null;
     //private Socket socket;
-    boolean isChannelReady = false;
-    boolean isInitiator = false;
+    //boolean isChannelReady = false;
+    //boolean isInitiator = false;
     boolean isStarted = false;
     private SignalingInterface callback;
     private FirebaseDatabase firebaseDatabase;
