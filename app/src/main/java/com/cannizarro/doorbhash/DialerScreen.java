@@ -61,7 +61,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-public class DialerScreen extends AppCompatActivity implements View.OnClickListener, SignallingClient.SignalingInterface {
+public class DialerScreen extends AppCompatActivity implements View.OnClickListener {
 
     String ANONYMOUS = "anonymous";
     PeerConnectionFactory peerConnectionFactory;
@@ -83,7 +83,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
 
     boolean gotUserMedia;
     boolean isinitiator = false;
-    boolean isChannelReady;
+    boolean isChannelReady=false;
     boolean isStarted = false;
     String username;
     String roomName;
@@ -201,6 +201,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         initVideos();
         getIceServers();
 
+
         //SignallingClient.getInstance().init(this);
 
         //Initialize PeerConnectionFactory globals.
@@ -260,6 +261,8 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         if(isinitiator){
             onTryToStart();
         }
+
+        attachReadListener();
     }
 
 
@@ -399,30 +402,25 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         showToast("Remote Peer Joined");
     }*/
 
-    @Override
-    public void onRemoteHangUp(String msg) {
-        showToast("Remote Peer hungup");
-        runOnUiThread(this::hangup);
-    }
+//    @Override
+//    public void onRemoteHangUp(String msg) {
+//        showToast("Remote Peer hungup");
+//        runOnUiThread(this::hangup);
+//    }
 
     /**
      * SignallingCallback - Called when remote peer sends offer
      */
-    @Override
-    public void onOfferReceived(final JSONObject data) {
+    public void onOfferReceived(final SDP data) {
         showToast("Received Offer");
         runOnUiThread(() -> {
             if (!isinitiator && !isStarted) {
                 onTryToStart();
             }
 
-            try {
-                localPeer.setRemoteDescription(new CustomSdpObserver("localSetRemote"), new SessionDescription(SessionDescription.Type.OFFER, data.getString("sdp")));
-                doAnswer();
-                updateVideoViews(true);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            localPeer.setRemoteDescription(new CustomSdpObserver("localSetRemote"), new SessionDescription(SessionDescription.Type.OFFER, data.sdp));
+            doAnswer();
+            updateVideoViews(true);
         });
     }
 
@@ -441,7 +439,6 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
      * SignallingCallback - Called when remote peer sends answer to your offer
      */
 
-    @Override
     public void onAnswerReceived(SDP data) {
         showToast("Received Answer");
         localPeer.setRemoteDescription(new CustomSdpObserver("localSetRemote"), new SessionDescription(SessionDescription.Type.fromCanonicalForm(data.type.toLowerCase()), data.sdp));
@@ -452,7 +449,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
     /**
      * Remote IceCandidate received
      */
-    @Override
+
     public void onIceCandidateReceived(SDP data) {
 
         localPeer.addIceCandidate(new IceCandidate(data.id, data.label, data.candidate));
@@ -522,14 +519,14 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
 
 
     public void emitMessage(String message) {
-        Log.d("SignallingClient", "emitMessage() called with: message = [" + message + "]");
+        Log.d("DialerScreen", "emitMessage() called with: message = [" + message + "]");
         //socket.emit("message", message);
     }
 
 
     public void emitMessage(SessionDescription message, String username) {
 
-        Log.d("SignallingClient", "emitMessage() called with: message = [" + message + "]");
+        Log.d("DialerScreen", "emitMessage() called with: message = [" + message + "]");
         SDP object = new SDP(message, username);
 
         Log.d("emitMessage", object.toString());
@@ -554,33 +551,18 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
 
                     SDP object = dataSnapshot.getValue(SDP.class);
 
-                    Log.d("SignallingClient", "message call() called with: args = [" + Arrays.toString(args) + "]");
-                    /*if (args[0] instanceof String) {
-                        Log.d("SignallingClient", "String received :: " + args[0]);
-                        String data = (String) args[0];
-                        if (data.equalsIgnoreCase("got user media")) {
-                            onTryToStart();
+                    if(object.username == username){
 
+                        Log.d("Dialer Screen Activity", "Children added :: " + object.toString());
+                        String type = object.type;
+                        if (type.equalsIgnoreCase("offer")) {
+                            onOfferReceived(object);
+                        } else if (type.equalsIgnoreCase("answer") && isStarted) {
+                            onAnswerReceived(object);
+                        } else if (type.equalsIgnoreCase("candidate") && isStarted) {
+                            onIceCandidateReceived(object);
                         }
-                    } else if (object instanceof SDP) {*/
-
-                        try {
-
-                            JSONObject data = (JSONObject) args[0];
-                            Log.d("SignallingClient", "Json Received :: " + data.toString());
-                            String type = data.getString("type");
-                            if (type.equalsIgnoreCase("offer")) {
-                                callback.onOfferReceived(data);
-                            } else if (type.equalsIgnoreCase("answer") && isStarted) {
-                                callback.onAnswerReceived(data);
-                            } else if (type.equalsIgnoreCase("candidate") && isStarted) {
-                                callback.onIceCandidateReceived(data);
-                            }
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
+                    }
                 }
 
                 @Override
