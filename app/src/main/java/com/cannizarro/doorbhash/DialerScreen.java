@@ -18,9 +18,16 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,6 +53,7 @@ import org.webrtc.VideoTrack;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import retrofit2.Call;
@@ -53,7 +61,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-public class DialerScreen extends AppCompatActivity implements View.OnClickListener, SignallingClient.SignalingInterface {
+public class DialerScreen extends AppCompatActivity implements View.OnClickListener {
 
     String ANONYMOUS = "anonymous";
     PeerConnectionFactory peerConnectionFactory;
@@ -75,9 +83,15 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
 
     boolean gotUserMedia;
     boolean isinitiator = false;
-    boolean isChannelReady;
+    boolean isChannelReady=false;
+    boolean isStarted = false;
     String username;
+    String roomName;
     List<PeerConnection.IceServer> peerIceServers = new ArrayList<>();
+
+    FirebaseDatabase firebaseDatabase;
+    DatabaseReference insideRoomReference;
+    ChildEventListener listener;
 
     final int ALL_PERMISSIONS_CODE = 1;
 
@@ -89,10 +103,13 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         Intent intent = getIntent();
+        firebaseDatabase = MainActivity.firebaseDatabase;
 
         isinitiator = intent.getBooleanExtra("initiator", false);
         username =intent.getStringExtra("username");
+        roomName = intent.getStringExtra("roomname");
 
+        insideRoomReference = firebaseDatabase.getReference("rooms/" + roomName);
 
         isChannelReady = true;
 
@@ -184,6 +201,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         initVideos();
         getIceServers();
 
+
         //SignallingClient.getInstance().init(this);
 
         //Initialize PeerConnectionFactory globals.
@@ -238,11 +256,13 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         remoteVideoView.setMirror(true);
 
         gotUserMedia = true;
-        Toast.makeText(this, "got user media", Toast.LENGTH_SHORT).show();
+        showToast("got user media");
         //if (SignallingClient.getInstance().isInitiator) {
         if(isinitiator){
             onTryToStart();
         }
+
+        attachReadListener();
     }
 
 
@@ -250,12 +270,12 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
      * This method will be called directly by the app when it is the initiator and has got the local media
      * or when the remote peer sends a message through socket that it is ready to transmit AV data
      */
-    @Override
+
     public void onTryToStart() {
         runOnUiThread(() -> {
-            if (!SignallingClient.getInstance().isStarted && localVideoTrack != null && isChannelReady) {
+            if (!isStarted && localVideoTrack != null && isChannelReady) {
                 createPeerConnection();
-                SignallingClient.getInstance().isStarted = true;
+                isStarted = true;
                 //if (SignallingClient.getInstance().isInitiator) {
                 if(isinitiator){
                     doCall();
@@ -324,7 +344,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
                 super.onCreateSuccess(sessionDescription);
                 localPeer.setLocalDescription(new CustomSdpObserver("localSetLocalDesc"), sessionDescription);
                 Log.d("onCreateSuccess", "SignallingClient emit ");
-                //SignallingClient.getInstance().emitMessage(sessionDescription, username);
+                emitMessage(sessionDescription, username);
             }
         }, sdpConstraints);
     }
@@ -352,7 +372,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
      */
     public void onIceCandidateReceived(IceCandidate iceCandidate) {
         //we have received ice candidate. We can set it to the other peer.
-        //SignallingClient.getInstance().emitIceCandidate(iceCandidate, username);
+        emitIceCandidate(iceCandidate, username);
     }
 
     /**
@@ -382,30 +402,25 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         showToast("Remote Peer Joined");
     }*/
 
-    @Override
-    public void onRemoteHangUp(String msg) {
-        showToast("Remote Peer hungup");
-        runOnUiThread(this::hangup);
-    }
+//    @Override
+//    public void onRemoteHangUp(String msg) {
+//        showToast("Remote Peer hungup");
+//        runOnUiThread(this::hangup);
+//    }
 
     /**
      * SignallingCallback - Called when remote peer sends offer
      */
-    @Override
-    public void onOfferReceived(final JSONObject data) {
+    public void onOfferReceived(final SDP data) {
         showToast("Received Offer");
         runOnUiThread(() -> {
-            if (!isinitiator && !SignallingClient.getInstance().isStarted) {
+            if (!isinitiator && !isStarted) {
                 onTryToStart();
             }
 
-            try {
-                localPeer.setRemoteDescription(new CustomSdpObserver("localSetRemote"), new SessionDescription(SessionDescription.Type.OFFER, data.getString("sdp")));
-                doAnswer();
-                updateVideoViews(true);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            localPeer.setRemoteDescription(new CustomSdpObserver("localSetRemote"), new SessionDescription(SessionDescription.Type.OFFER, data.sdp));
+            doAnswer();
+            updateVideoViews(true);
         });
     }
 
@@ -415,7 +430,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
             public void onCreateSuccess(SessionDescription sessionDescription) {
                 super.onCreateSuccess(sessionDescription);
                 localPeer.setLocalDescription(new CustomSdpObserver("localSetLocal"), sessionDescription);
-                //SignallingClient.getInstance().emitMessage(sessionDescription, username);
+                emitMessage(sessionDescription, username);
             }
         }, new MediaConstraints());
     }
@@ -424,7 +439,6 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
      * SignallingCallback - Called when remote peer sends answer to your offer
      */
 
-    @Override
     public void onAnswerReceived(SDP data) {
         showToast("Received Answer");
         localPeer.setRemoteDescription(new CustomSdpObserver("localSetRemote"), new SessionDescription(SessionDescription.Type.fromCanonicalForm(data.type.toLowerCase()), data.sdp));
@@ -435,7 +449,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
     /**
      * Remote IceCandidate received
      */
-    @Override
+
     public void onIceCandidateReceived(SDP data) {
 
         localPeer.addIceCandidate(new IceCandidate(data.id, data.label, data.candidate));
@@ -476,7 +490,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         try {
             localPeer.close();
             localPeer = null;
-            //SignallingClient.getInstance().close();
+            close();
             updateVideoViews(false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -486,9 +500,120 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onDestroy() {
-        //SignallingClient.getInstance().close();
+        close();
         super.onDestroy();
     }
+
+    /**
+     * Signalling Client Methods implemented
+     */
+
+    public void emitIceCandidate(IceCandidate iceCandidate, String username) {
+
+        SDP object = new SDP(iceCandidate, username);
+        insideRoomReference.push().setValue(object);
+
+        //socket.emit("message", object);
+
+    }
+
+
+    public void emitMessage(String message) {
+        Log.d("DialerScreen", "emitMessage() called with: message = [" + message + "]");
+        //socket.emit("message", message);
+    }
+
+
+    public void emitMessage(SessionDescription message, String username) {
+
+        Log.d("DialerScreen", "emitMessage() called with: message = [" + message + "]");
+        SDP object = new SDP(message, username);
+
+        Log.d("emitMessage", object.toString());
+        insideRoomReference.push().setValue(object);
+        //socket.emit("message", obj);
+        Log.d("vivek1794", object.toString());
+    }
+
+    public void close() {
+        insideRoomReference.setValue(null);
+        detachReadListener();
+    }
+
+
+    public void attachReadListener(){
+
+        if(listener == null){
+
+            listener = new ChildEventListener() {
+                @Override
+                public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                    SDP object = dataSnapshot.getValue(SDP.class);
+
+                    if(object.username == username){
+
+                        Log.d("Dialer Screen Activity", "Children added :: " + object.toString());
+                        String type = object.type;
+                        if (type.equalsIgnoreCase("offer")) {
+                            onOfferReceived(object);
+                        } else if (type.equalsIgnoreCase("answer") && isStarted) {
+                            onAnswerReceived(object);
+                        } else if (type.equalsIgnoreCase("candidate") && isStarted) {
+                            onIceCandidateReceived(object);
+                        }
+                    }
+                }
+
+                @Override
+                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                }
+
+                @Override
+                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+                    showToast("Remote Peer hungup");
+                    runOnUiThread(this::hangup);
+
+                }
+
+                private void hangup() {
+                    try {
+                        localPeer.close();
+                        localPeer = null;
+                        close();
+                        updateVideoViews(false);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            };
+            insideRoomReference.addChildEventListener(listener);
+        }
+
+    }
+
+    public void detachReadListener(){
+        if(listener != null){
+
+            insideRoomReference.removeEventListener(listener);
+            listener = null;
+
+        }
+    }
+
+
 
     /**
      * Util Methods

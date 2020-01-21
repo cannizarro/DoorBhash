@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
         databaseReference = firebaseDatabase.getReference("rooms");
 
         roomText = findViewById(R.id.roomName);
+        roomText.setEnabled(false);
         createRoomButton = findViewById(R.id.create);
 
         mFirebaseAuth = FirebaseAuth.getInstance();

@@ -26,6 +26,7 @@ public class RoomList extends AppCompatActivity {
     String roomName;
     String username;
     ArrayList<String> roomList;
+    ArrayList<String> roomKeys;
     ArrayAdapter<String> adapter;
 
     ChildEventListener listener;
@@ -50,11 +51,14 @@ public class RoomList extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                roomName=adapter.getItem(i);
+                roomName=roomKeys.get(i);
                 Intent intent1 = new Intent(getApplicationContext(), DialerScreen.class)
                         .putExtra("initiator", false)
                         .putExtra("username", username)
-                        .putExtra("roomname", roomName);
+                        .putExtra("roomname", roomKeys);
+
+                //Roomkeys is the real room name which enables us to have multiple rooms of same name
+
                 startActivity(intent1);
             }
         });
@@ -82,6 +86,7 @@ public class RoomList extends AppCompatActivity {
                 @Override
                 public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                     roomList.add(dataSnapshot.getValue().toString());
+                    roomKeys.add(dataSnapshot.getKey());
                     adapter.notifyDataSetChanged();
                 }
 
