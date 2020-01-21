@@ -11,7 +11,7 @@ public class SDP {
     public String type;
     public String sdp;
 
-    public int label;
+    public Integer label;
     public String id;
     public String candidate;
 
@@ -25,6 +25,11 @@ public class SDP {
         this.candidate = iceCandidate.sdp;
 
     }*/
+
+    public SDP(){
+
+    }
+
     public SDP(IceCandidate iceCandidate, String username){
 
         this.sdp = null;
@@ -40,7 +45,7 @@ public class SDP {
         this.username = username;
         this.type = message.type.canonicalForm();
         this.sdp = message.description;
-        this.label = Integer.parseInt(null);
+        this.label = null;
         this.id = null;
         this.candidate = null;
 

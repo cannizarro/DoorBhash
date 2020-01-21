@@ -39,6 +39,7 @@ public class RoomList extends AppCompatActivity {
         Intent intent = getIntent();
         username = intent.getStringExtra("username");
         roomList = new ArrayList<>();
+        roomKeys = new ArrayList<>();
         firebaseDatabase = MainActivity.firebaseDatabase;
 
         attachListener();

@@ -48,8 +48,8 @@ public class MainActivity extends AppCompatActivity {
         databaseReference = firebaseDatabase.getReference("rooms");
 
         roomText = findViewById(R.id.roomName);
-        roomText.setEnabled(false);
         createRoomButton = findViewById(R.id.create);
+        createRoomButton.setEnabled(false);
 
         mFirebaseAuth = FirebaseAuth.getInstance();
 
@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
                 .putExtra("initiator", true)
                 .putExtra("username", username)
                 .putExtra("roomname", roomName);
-        //startActivity(intent);
+        startActivity(intent);
 
     }
 

@@ -11,6 +11,6 @@ import retrofit2.http.PUT;
 
 
 public interface TurnServer {
-    @PUT("/_turn/<xyrsys_channel>")
+    @PUT("/_turn/MyFirstApp")
     Call<TurnServerPojo> getIceCandidates(@Header("Authorization") String authkey);
 }

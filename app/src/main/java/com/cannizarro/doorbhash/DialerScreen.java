@@ -45,6 +45,7 @@ import org.webrtc.MediaStream;
 import org.webrtc.PeerConnection;
 import org.webrtc.PeerConnectionFactory;
 import org.webrtc.SessionDescription;
+import org.webrtc.SurfaceTextureHelper;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoCapturer;
 //import org.webrtc.VideoRenderer;
@@ -100,7 +101,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_dialer_screen);
 
         Intent intent = getIntent();
         firebaseDatabase = MainActivity.firebaseDatabase;
@@ -162,7 +163,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         //get Ice servers using xirsys
         byte[] data = new byte[0];
         try {
-            data = ("<xirsys_ident>:<xirsys_secret>").getBytes("UTF-8");
+            data = ("helloworld:ca2fa126-3095-11ea-8d0f-0242ac110003").getBytes("UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -233,10 +234,17 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         audioConstraints = new MediaConstraints();
         videoConstraints = new MediaConstraints();
 
+
+        SurfaceTextureHelper surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", rootEglBase.getEglBaseContext());
+
         //Create a VideoSource instance
         if (videoCapturerAndroid != null) {
             videoSource = peerConnectionFactory.createVideoSource(videoCapturerAndroid.isScreencast());
         }
+
+        videoCapturerAndroid.initialize(surfaceTextureHelper, getApplicationContext(), videoSource.getCapturerObserver());
+
+
         localVideoTrack = peerConnectionFactory.createVideoTrack("100", videoSource);
 
         //create an AudioSource instance
@@ -476,6 +484,8 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
      * Closing up - normal hangup and app destroye
      */
 
+
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -538,6 +548,8 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
     public void close() {
         insideRoomReference.setValue(null);
         detachReadListener();
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(intent);
     }
 
 
@@ -626,6 +638,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
     public void showToast(final String msg) {
         runOnUiThread(() -> Toast.makeText(DialerScreen.this, msg, Toast.LENGTH_SHORT).show());
     }
+
 
     private VideoCapturer createCameraCapturer(CameraEnumerator enumerator) {
         final String[] deviceNames = enumerator.getDeviceNames();
