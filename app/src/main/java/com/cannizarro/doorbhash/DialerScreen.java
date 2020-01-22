@@ -110,7 +110,9 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         username =intent.getStringExtra("username");
         roomName = intent.getStringExtra("roomname");
 
-        insideRoomReference = firebaseDatabase.getReference("rooms/" + roomName);
+        Log.d("Hello", roomName + " : Room Key");
+
+        insideRoomReference = firebaseDatabase.getReference("rooms/" + roomName + "/");
 
         isChannelReady = true;
 
@@ -268,6 +270,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         //if (SignallingClient.getInstance().isInitiator) {
         if(isinitiator){
             onTryToStart();
+            Log.d("Hello", "onTryToStart() executed, is initiator is true");
         }
 
         attachReadListener();
@@ -539,8 +542,13 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         Log.d("DialerScreen", "emitMessage() called with: message = [" + message + "]");
         SDP object = new SDP(message, username);
 
-        Log.d("emitMessage", object.toString());
-        insideRoomReference.push().setValue(object);
+        Log.d("emitMessage", message.toString());
+        insideRoomReference.push().setValue(object, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                Log.d("Hello", "session des pushed");
+            }
+        });
         //socket.emit("message", obj);
         Log.d("vivek1794", object.toString());
     }
@@ -563,7 +571,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
 
                     SDP object = dataSnapshot.getValue(SDP.class);
 
-                    if(object.username == username){
+                    if(object.username != username){
 
                         Log.d("Dialer Screen Activity", "Children added :: " + object.toString());
                         String type = object.type;

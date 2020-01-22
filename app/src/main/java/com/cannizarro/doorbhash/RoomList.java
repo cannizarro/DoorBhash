@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -26,7 +27,6 @@ public class RoomList extends AppCompatActivity {
     String roomName;
     String username;
     ArrayList<String> roomList;
-    ArrayList<String> roomKeys;
     ArrayAdapter<String> adapter;
 
     ChildEventListener listener;
@@ -39,7 +39,6 @@ public class RoomList extends AppCompatActivity {
         Intent intent = getIntent();
         username = intent.getStringExtra("username");
         roomList = new ArrayList<>();
-        roomKeys = new ArrayList<>();
         firebaseDatabase = MainActivity.firebaseDatabase;
 
         attachListener();
@@ -52,11 +51,13 @@ public class RoomList extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                roomName=roomKeys.get(i);
+                roomName=roomList.get(i);
                 Intent intent1 = new Intent(getApplicationContext(), DialerScreen.class)
                         .putExtra("initiator", false)
                         .putExtra("username", username)
-                        .putExtra("roomname", roomKeys);
+                        .putExtra("roomname", roomName);
+
+                Log.d("Asrar Debug", roomName + " : Roomname");
 
                 //Roomkeys is the real room name which enables us to have multiple rooms of same name
 
@@ -86,8 +87,7 @@ public class RoomList extends AppCompatActivity {
             listener = new ChildEventListener() {
                 @Override
                 public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                    roomList.add(dataSnapshot.getValue().toString());
-                    roomKeys.add(dataSnapshot.getKey());
+                    roomList.add(dataSnapshot.getKey().toString());
                     adapter.notifyDataSetChanged();
                 }
 

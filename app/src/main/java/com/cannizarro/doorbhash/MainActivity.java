@@ -1,12 +1,14 @@
 package com.cannizarro.doorbhash;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,6 +17,7 @@ import android.widget.Toast;
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -111,9 +114,11 @@ public class MainActivity extends AppCompatActivity {
         //Creating room. Adding a child named what's in the edit text
         roomName = roomText.getText().toString();
         roomText.setText(null);
+        //String roomKey;
 
-        databaseReference.push().setValue(roomName);
-        //databaseReference.child("/" + roomName + "/");
+
+        //roomKey = databaseReference.push().getKey();
+        databaseReference.setValue(roomName);
 
         Intent intent = new Intent(getApplicationContext(), DialerScreen.class)
                 .putExtra("initiator", true)
@@ -131,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void signOut(){
+    public void signOut(View v){
         AuthUI.getInstance().signOut(getApplicationContext());
 
     }
