@@ -1,3 +1,3 @@
 # DoorBhash
-An AppRTC based peer to peer demo video calling app.
+An WebRTC based peer to peer demo video calling app.
 Xirsys is used for STUN and TURN needs.
