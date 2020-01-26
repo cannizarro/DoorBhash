@@ -2,8 +2,12 @@ package com.cannizarro.doorbhash;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.media.AudioDeviceCallback;
+import android.media.AudioManager;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -46,7 +50,6 @@ import org.webrtc.VideoCapturer;
 import org.webrtc.VideoSource;
 import org.webrtc.VideoTrack;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +70,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
     VideoTrack localVideoTrack;
     AudioSource audioSource;
     AudioTrack localAudioTrack;
+    HeadsetPlugReceiver headsetPlugReceiver;
 
     SurfaceViewRenderer localVideoView;
     SurfaceViewRenderer remoteVideoView;
@@ -98,15 +102,21 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dialer_screen);
 
-        Intent intent = getIntent();
-        firebaseDatabase = MainActivity.firebaseDatabase;
 
+        headsetPlugReceiver = new HeadsetPlugReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("android.intent.action.HEADSET_PLUG");
+        registerReceiver(headsetPlugReceiver, intentFilter);
+
+
+        Intent intent = getIntent();
         isinitiator = intent.getBooleanExtra("initiator", false);
         username =intent.getStringExtra("username");
         roomName = intent.getStringExtra("roomname");
 
         Log.d("Hello", roomName + " : Room Key");
 
+        firebaseDatabase = MainActivity.firebaseDatabase;
         insideRoomReference = firebaseDatabase.getReference("rooms/" + roomName + "/");
 
         isChannelReady = true;
@@ -251,7 +261,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         remoteVideoView.setMirror(true);
 
         gotUserMedia = true;
-        showToast("got user media");
+        showToast("Got local media");
 
         if(isinitiator){
             onTryToStart();
