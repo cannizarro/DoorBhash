@@ -64,21 +64,6 @@ public class RoomList extends AppCompatActivity {
                 startActivity(intent1);
             }
         });
-
-        /*
-        listItem = getResources().getStringArray(R.array.array_technology);
-        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, android.R.id.text1, listItem);
-        listView.setAdapter(adapter);
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                // TODO Auto-generated method stub
-
-            }
-        });
-        */
     }
 
     private void attachListener(){
@@ -87,7 +72,7 @@ public class RoomList extends AppCompatActivity {
             listener = new ChildEventListener() {
                 @Override
                 public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                    roomList.add(dataSnapshot.getKey().toString());
+                    roomList.add(dataSnapshot.getKey());
                     adapter.notifyDataSetChanged();
                 }
 

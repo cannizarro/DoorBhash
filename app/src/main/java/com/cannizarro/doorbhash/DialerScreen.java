@@ -4,10 +4,6 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-/*import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;*/
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -29,8 +25,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
 import org.webrtc.Camera1Enumerator;
@@ -38,6 +32,7 @@ import org.webrtc.CameraEnumerator;
 import org.webrtc.DefaultVideoDecoderFactory;
 import org.webrtc.DefaultVideoEncoderFactory;
 import org.webrtc.EglBase;
+import org.webrtc.EglRenderer;
 import org.webrtc.IceCandidate;
 import org.webrtc.Logging;
 import org.webrtc.MediaConstraints;
@@ -48,13 +43,12 @@ import org.webrtc.SessionDescription;
 import org.webrtc.SurfaceTextureHelper;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoCapturer;
-//import org.webrtc.VideoRenderer;
 import org.webrtc.VideoSource;
 import org.webrtc.VideoTrack;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import retrofit2.Call;
@@ -76,6 +70,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
 
     SurfaceViewRenderer localVideoView;
     SurfaceViewRenderer remoteVideoView;
+    SurfaceTextureHelper surfaceTextureHelper;
 
     Button hangup;
     PeerConnection localPeer;
@@ -164,11 +159,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
     private void getIceServers() {
         //get Ice servers using xirsys
         byte[] data = new byte[0];
-        try {
-            data = ("helloworld:ca2fa126-3095-11ea-8d0f-0242ac110003").getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        data = ("helloworld:ca2fa126-3095-11ea-8d0f-0242ac110003").getBytes(StandardCharsets.UTF_8);
         String authToken = "Basic " + Base64.encodeToString(data, Base64.NO_WRAP);
         Utils.getInstance().getRetrofitInstance().getIceCandidates(authToken).enqueue(new Callback<TurnServerPojo>() {
             @Override
@@ -204,13 +195,8 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         initVideos();
         getIceServers();
 
-
-        //SignallingClient.getInstance().init(this);
-
-        //Initialize PeerConnectionFactory globals.
         PeerConnectionFactory.InitializationOptions initializationOptions =
                 PeerConnectionFactory.InitializationOptions.builder(this)
-                        //.setEnableVideoHwAcceleration(true)
                         .createInitializationOptions();
         PeerConnectionFactory.initialize(initializationOptions);
 
@@ -219,7 +205,6 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         DefaultVideoEncoderFactory defaultVideoEncoderFactory = new DefaultVideoEncoderFactory(
                 rootEglBase.getEglBaseContext(),  /* enableIntelVp8Encoder */true,  /* enableH264HighProfile */true);
         DefaultVideoDecoderFactory defaultVideoDecoderFactory = new DefaultVideoDecoderFactory(rootEglBase.getEglBaseContext());
-        //peerConnectionFactory = new PeerConnectionFactory(options, defaultVideoEncoderFactory, defaultVideoDecoderFactory);
         peerConnectionFactory = PeerConnectionFactory.builder()
                 .setVideoEncoderFactory(defaultVideoEncoderFactory)
                 .setVideoDecoderFactory(defaultVideoDecoderFactory)
@@ -237,7 +222,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         videoConstraints = new MediaConstraints();
 
 
-        SurfaceTextureHelper surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", rootEglBase.getEglBaseContext());
+        surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", rootEglBase.getEglBaseContext());
 
         //Create a VideoSource instance
         if (videoCapturerAndroid != null) {
@@ -267,7 +252,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
 
         gotUserMedia = true;
         showToast("got user media");
-        //if (SignallingClient.getInstance().isInitiator) {
+
         if(isinitiator){
             onTryToStart();
             Log.d("Hello", "onTryToStart() executed, is initiator is true");
@@ -287,7 +272,6 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
             if (!isStarted && localVideoTrack != null && isChannelReady) {
                 createPeerConnection();
                 isStarted = true;
-                //if (SignallingClient.getInstance().isInitiator) {
                 if(isinitiator){
                     doCall();
                 }
@@ -386,41 +370,9 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         emitIceCandidate(iceCandidate, username);
     }
 
-    /**
-     * SignallingCallback - called when the room is created - i.e. you are the initiator
-     */
-    /*@Override
-    public void onCreatedRoom() {
-        showToast("You created the room " + gotUserMedia);
-        if (gotUserMedia) {
-            SignallingClient.getInstance().emitMessage("got user media");
-        }
-    }*/
 
     /**
-     * SignallingCallback - called when you join the room - you are a participant
-     */
-    /*@Override
-    public void onJoinedRoom() {
-        showToast("You joined the room " + gotUserMedia);
-        if (gotUserMedia) {
-            SignallingClient.getInstance().emitMessage("got user media");
-        }
-    }
-
-    @Override
-    public void onNewPeerJoined() {
-        showToast("Remote Peer Joined");
-    }*/
-
-//    @Override
-//    public void onRemoteHangUp(String msg) {
-//        showToast("Remote Peer hungup");
-//        runOnUiThread(this::hangup);
-//    }
-
-    /**
-     * SignallingCallback - Called when remote peer sends offer
+     * Called when remote peer sends offer
      */
     public void onOfferReceived(final SDP data) {
         showToast("Received Offer");
@@ -447,7 +399,7 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
     }
 
     /**
-     * SignallingCallback - Called when remote peer sends answer to your offer
+     * Called when remote peer sends answer to your offer
      */
 
     public void onAnswerReceived(SDP data) {
@@ -460,7 +412,6 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
     /**
      * Remote IceCandidate received
      */
-
     public void onIceCandidateReceived(SDP data) {
 
         localPeer.addIceCandidate(new IceCandidate(data.id, data.label, data.candidate));
@@ -484,11 +435,8 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
 
 
     /**
-     * Closing up - normal hangup and app destroye
+     * Closing up - normal hangup and app destroyed
      */
-
-
-
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -526,14 +474,6 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         SDP object = new SDP(iceCandidate, username);
         insideRoomReference.push().setValue(object);
 
-        //socket.emit("message", object);
-
-    }
-
-
-    public void emitMessage(String message) {
-        Log.d("DialerScreen", "emitMessage() called with: message = [" + message + "]");
-        //socket.emit("message", message);
     }
 
 
@@ -549,13 +489,13 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
                 Log.d("Hello", "session des pushed");
             }
         });
-        //socket.emit("message", obj);
-        Log.d("vivek1794", object.toString());
     }
 
     public void close() {
         insideRoomReference.setValue(null);
         detachReadListener();
+        surfaceTextureHelper.stopListening();
+
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(intent);
     }
@@ -626,10 +566,8 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
 
     public void detachReadListener(){
         if(listener != null){
-
             insideRoomReference.removeEventListener(listener);
             listener = null;
-
         }
     }
 

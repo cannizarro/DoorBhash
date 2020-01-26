@@ -1,14 +1,11 @@
 package com.cannizarro.doorbhash;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,7 +14,6 @@ import android.widget.Toast;
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -75,33 +71,30 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mAuthStateListner = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+        mAuthStateListner = firebaseAuth -> {
 
 
-                FirebaseUser firebaseUser=firebaseAuth.getCurrentUser();
-                if(firebaseUser != null)
-                {
-                    //signed in
-                    onSignedInInitialize(firebaseUser.getDisplayName());
-                }
-                else
-                {
-                    //signed out
-                    onSignedOutCleanup();
-                    // Choose authentication providers
-                    List<AuthUI.IdpConfig> providers = Arrays.asList(
-                            new AuthUI.IdpConfig.GoogleBuilder().build());
+            FirebaseUser firebaseUser=firebaseAuth.getCurrentUser();
+            if(firebaseUser != null)
+            {
+                //signed in
+                onSignedInInitialize(firebaseUser.getDisplayName());
+            }
+            else
+            {
+                //signed out
+                onSignedOutCleanup();
+                // Choose authentication providers
+                List<AuthUI.IdpConfig> providers = Arrays.asList(
+                        new AuthUI.IdpConfig.GoogleBuilder().build());
 
-                    // Create and launch sign-in intent
-                    startActivityForResult(
-                            AuthUI.getInstance()
-                                    .createSignInIntentBuilder()
-                                    .setAvailableProviders(providers)
-                                    .build(),
-                            RC_SIGN_IN);
-                }
+                // Create and launch sign-in intent
+                startActivityForResult(
+                        AuthUI.getInstance()
+                                .createSignInIntentBuilder()
+                                .setAvailableProviders(providers)
+                                .build(),
+                        RC_SIGN_IN);
             }
         };
 

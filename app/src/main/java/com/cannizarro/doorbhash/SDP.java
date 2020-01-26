@@ -15,17 +15,6 @@ public class SDP {
     public String id;
     public String candidate;
 
-    /*public SDP(IceCandidate iceCandidate){
-
-        this.sdp = null;
-        this.username = "Anonymous";
-        this.type = "candidate";
-        this.label = iceCandidate.sdpMLineIndex;
-        this.id = iceCandidate.sdpMid;
-        this.candidate = iceCandidate.sdp;
-
-    }*/
-
     public SDP(){
 
     }
@@ -38,7 +27,6 @@ public class SDP {
         this.label = iceCandidate.sdpMLineIndex;
         this.id = iceCandidate.sdpMid;
         this.candidate = iceCandidate.sdp;
-
     }
 
     public SDP(SessionDescription message, String username) {
@@ -48,19 +36,5 @@ public class SDP {
         this.label = null;
         this.id = null;
         this.candidate = null;
-
     }
-
-    /*public SDP(SessionDescription message) {
-        this.username = "Anonymous";
-        this.type = message.type.canonicalForm();
-        this.sdp = message.description;
-        this.label = Integer.parseInt(null);
-        this.id = null;
-        this.candidate = null;
-    }
-*/
-
-
-
 }

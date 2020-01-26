@@ -37,8 +37,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="136dp"
+        android:layout_marginBottom="60dp"
         android:onClick="joinRoom"
         android:text="Join Room"
+        app:layout_constraintBottom_toTopOf="@+id/sign"
         app:layout_constraintEnd_toEndOf="@+id/roomName"
         app:layout_constraintHorizontal_bias="0.451"
         app:layout_constraintStart_toStartOf="@+id/roomName"
@@ -51,8 +53,10 @@
         android:layout_marginTop="244dp"
         android:onClick="signOut"
         android:text="Sign Out"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/join"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/join"
-        app:layout_constraintTop_toBottomOf="@+id/roomName" />
+        app:layout_constraintTop_toBottomOf="@+id/roomName"
+        app:layout_constraintVertical_bias="0.204" />
 </androidx.constraintlayout.widget.ConstraintLayout>
