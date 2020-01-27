@@ -16,7 +16,6 @@
         android:inputType="textPersonName"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.434"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.253" />
@@ -25,10 +24,11 @@
         android:id="@+id/create"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:onClick="createRoom"
         android:text="Create Room"
-        app:layout_constraintBottom_toTopOf="@+id/join"
         app:layout_constraintEnd_toEndOf="@+id/roomName"
+        app:layout_constraintHorizontal_bias="0.44"
         app:layout_constraintStart_toStartOf="@+id/roomName"
         app:layout_constraintTop_toBottomOf="@+id/roomName" />
 
@@ -36,27 +36,23 @@
         android:id="@+id/join"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="136dp"
-        android:layout_marginBottom="60dp"
+        android:layout_marginTop="20dp"
         android:onClick="joinRoom"
         android:text="Join Room"
-        app:layout_constraintBottom_toTopOf="@+id/sign"
         app:layout_constraintEnd_toEndOf="@+id/roomName"
         app:layout_constraintHorizontal_bias="0.451"
         app:layout_constraintStart_toStartOf="@+id/roomName"
-        app:layout_constraintTop_toBottomOf="@+id/roomName" />
+        app:layout_constraintTop_toBottomOf="@+id/create" />
 
     <Button
         android:id="@+id/sign"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="244dp"
+        android:layout_marginTop="20dp"
         android:onClick="signOut"
         android:text="Sign Out"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/join"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/join"
-        app:layout_constraintTop_toBottomOf="@+id/roomName"
-        app:layout_constraintVertical_bias="0.204" />
+        app:layout_constraintEnd_toEndOf="@+id/roomName"
+        app:layout_constraintHorizontal_bias="0.504"
+        app:layout_constraintStart_toStartOf="@+id/roomName"
+        app:layout_constraintTop_toBottomOf="@+id/join" />
 </androidx.constraintlayout.widget.ConstraintLayout>

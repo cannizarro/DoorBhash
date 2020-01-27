@@ -114,8 +114,6 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
         username =intent.getStringExtra("username");
         roomName = intent.getStringExtra("roomname");
 
-        Log.d("Hello", roomName + " : Room Key");
-
         firebaseDatabase = MainActivity.firebaseDatabase;
         insideRoomReference = firebaseDatabase.getReference("rooms/" + roomName + "/");
 
@@ -504,8 +502,6 @@ public class DialerScreen extends AppCompatActivity implements View.OnClickListe
     public void close() {
         insideRoomReference.setValue(null);
         detachReadListener();
-        surfaceTextureHelper.stopListening();
-
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(intent);
     }
